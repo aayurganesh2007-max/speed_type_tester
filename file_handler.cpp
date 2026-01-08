@@ -28,8 +28,7 @@ std::tuple<bool, std::vector<std::string>> read_words_from_file(const std::strin
 bool write_analytics_csvfile(const std::string &filename, const std::vector<std::string> &data) {
     /**
      * @brief first reads the file, if the file doesnt not exist it creates a file 
-     * Then checks if the header date_time,timestamp, wpm, cpm, accuracy_words, 
-     * accuracy_chars, most_mistyped_char, already exists in the file
+     * Then checks if the header date_time,timestamp, difficulty_level,net_wpm, raw_wpm,net_cpm_raw_cpm,accuracy_words,accuracy_chars, already exists in the file
      * then it writes onto the file
      * By updating the file every time it is called keeping the original data intact.
      * it writes the each row of data in a new line, under respective headers.
@@ -59,7 +58,7 @@ bool write_analytics_csvfile(const std::string &filename, const std::vector<std:
             std::string header;
             std::getline(infile, header);
             //check if the getline worked fine before comparing
-            if (header == "date_time,timestamp,wpm,cpm,accuracy_words,accuracy_chars,most_mistyped_char") {
+            if (header == "date_time,timestamp,difficulty_level,net_wpm,raw_wpm,net_cpm,raw_cpm,accuracy_words,accuracy_chars") {
                 header_exists = true;
             }
         }
@@ -72,7 +71,7 @@ bool write_analytics_csvfile(const std::string &filename, const std::vector<std:
         return false;
     }
     if (!header_exists) {
-        outfile << "date_time,timestamp,wpm,cpm,accuracy_words,accuracy_chars,most_mistyped_char\n";
+        outfile << "date_time,timestamp,difficulty_level,net_wpm,raw_wpm,net_cpm,raw_cpm,accuracy_words,accuracy_chars\n";
     }
     for (size_t i = 0; i < data.size(); ++i) {
         outfile << data[i];
@@ -85,7 +84,7 @@ bool write_analytics_csvfile(const std::string &filename, const std::vector<std:
     return true;
 }
 
-bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename) {
+bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename, struct SessionData &session_data) {
     /**
      * @brief Writes the incorrect words to a text file with date and time 
      * In each row it consists of teh date time followed by all the incorrect words of a particular session
@@ -99,14 +98,8 @@ bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, co
     if (!outfile.is_open()) {
         return false;
     }
-    auto current_time = std::time(nullptr);
-    char *raw_time = ctime(&current_time);
-    std::string time_str(raw_time);
-    // Remove the newline character at the end of ctime
-    if (!time_str.empty() && time_str.back() == '\n') {
-        time_str.pop_back();
-    }
-    outfile<<time_str<<" "; // extract the start date and time
+    std::string time_str = session_data.start_data_time;
+    outfile<<time_str<<"|"; // extract the start date and time
     for (const auto &word : incorrect_words) {
         outfile << word << " ";
     }
@@ -115,4 +108,5 @@ bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, co
     return true;
 }
    
+
     

@@ -4,6 +4,26 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+
+
+std::vector<std::string> generate_random_words(int num_words, std::vector<std::string> &file_words){
+
+    /** Generates a random set of words from a given file.
+    args:
+        num_words (int): The number of words to generate.
+        file_words (std::vector<std::string>): The vector of strings to generate words from.
+    returns:
+        std::vector<std::string>: A vector of strings containing the generated words.
+    */
+    std::vector<std::string> per_linewords;
+    for (int i = 0; i < num_words && i < file_words.size(); ++i) {
+        // Generate a random index to select a word
+        std::uniform_int_distribution<> distr(0, file_words.size() - 1);
+        int random = distr(gen);
+        per_linewords.push_back(file_words[random]);
+    }
+    return per_linewords;
+}
 void display_random_words(const std::string &filename, int num_words, std::vector<std::string> &display_words)
 /**
  * @brief Displays a specified number of random words in same line from a given file randomnly.
@@ -12,24 +32,39 @@ void display_random_words(const std::string &filename, int num_words, std::vecto
  * @param num_words The number of random words to display.
  * @return void
  */
- {  std::vector<std::string> words;
+ {  std::vector<std::string> file_words;
     bool success= false;
 
-    std::tie(success, words) = read_words_from_file(filename);
+    std::tie(success,file_words) = read_words_from_file(filename);
     if (!success) {
         std::cerr << "Error: Could not open file " << filename << std::endl;
         return;
     }
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    for (int i = 0; i < num_words && i < words.size(); ++i) {
-        // Generate a random index to select a word
-        std::uniform_int_distribution<> distr(0, words.size() - 1);
-        int random = distr(gen);
-        display_words.push_back(words[random]);
-        std::cout << words[random] << " ";
+    std::vector<std::string> per_linewords = generate_random_words(num_words, file_words);
+    for (int i = 0; i < per_linewords.size(); ++i) {
+        display_words.push_back(per_linewords[i]);
+        std::cout << per_linewords[i] << " ";
     }
     std::cout<<'\n';
+}
+
+std::vector<std::string> generate_random_words(int num_words, std::vector<std::string> &file_words){
+
+    /** Generates a random set of words from a given file.
+    args:
+        num_words (int): The number of words to generate.
+        file_words (std::vector<std::string>): The vector of strings to generate words from.
+    returns:
+        std::vector<std::string>: A vector of strings containing the generated words.
+    */
+    std::vector<std::string> per_linewords;
+    for (int i = 0; i < num_words && i < file_words.size(); ++i) {
+        // Generate a random index to select a word
+        std::uniform_int_distribution<> distr(0, file_words.size() - 1);
+        int random = distr(gen);
+        per_linewords.push_back(file_words[random]);
+    }
+    return per_linewords;
 }
 
 void input_typed_words(int num_words, std::vector<std::string> &inp_words,std::chrono::steady_clock::time_point end_time)
@@ -52,27 +87,25 @@ void input_typed_words(int num_words, std::vector<std::string> &inp_words,std::c
     std::cout<<'\n';
 }
 
-void display_session_summary(const std::vector<std::string> &data, const std::vector<std::string> &incorrect_words)
+void display_session_summary(struct SessionData &session_data)
 /**
  * @brief Displays a summary of the typing session based on the provided data.
  *
- * @param data A vector of strings containing the session data.
- * @param incorrect_words_list A vector of strings containing the incorrectly typed words.
+ * @param session_data A struct containing the session data.
  * @return void
  */
-{
-    if (data.size() <6) {
-        std::cerr << "Error: Insufficient data to display session summary." << std::endl;
-        return;
-    }
-    std::cout << "Session Summary:" << std::endl;
-    std::cout << "Date and Time: " << data[0] << std::endl;
-    std::cout << "Time Taken (seconds): " << data[1] << std::endl;
-    std::cout << "Words Per Minute (WPM): " << data[2] << std::endl;
-    std::cout << "Characters Per Minute (CPM): " << data[3] << std::endl;
-    std::cout << "Word Accuracy (%): " << data[4] << std::endl;
-    std::cout << "Character Accuracy (%): " << data[5] << std::endl;
-    for (int i = 0; i < incorrect_words.size(); ++i) {
-        std::cout << incorrect_words[i] << " ";
-    }   
+{ 
+    std::cout << "Session Summary:" << std::endl; 
+    std::cout << "Date and Time: " << session_data.start_data_time << std::endl;
+    std::cout << "Time Taken (seconds): " << session_data.timestamp << std::endl;
+    std::cout << "Difficulty Level: " << session_data.difficulty_level << std::endl;
+    std::cout << "net words per minute (WPM): " << session_data.net_wpm << std::endl;
+    std::cout << "raw words per minute (WPM): " << session_data.raw_wpm << std::endl;
+    std::cout << "net characters per minute (CPM): " << session_data.net_cpm << std::endl;
+    std::cout << "raw characters per minute (CPM): " << session_data.raw_cpm << std::endl;
+    std::cout << "Word Accuracy (%): " << session_data.accuracy_words << std::endl;
+    std::cout << "Character Accuracy (%): " << session_data.accuracy_chars << std::endl;
+    for (int i = 0; i < session_data.incorrect_words.size(); ++i) {
+        std::cout << session_data.incorrect_words[i] << " ";
+        }
 } 

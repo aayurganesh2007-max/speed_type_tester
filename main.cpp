@@ -26,6 +26,7 @@ int main(){
     int num_words;
     int timer_seconds;
     int difficulty_choice; 
+    string difficulty;
     int timer_choice;  
     int start_choice;
     int save_choice;
@@ -37,15 +38,19 @@ int main(){
     switch(difficulty_choice) {
         case 1:
             filename = "easy_words.txt";
+            difficulty = "easy";
             break;
         case 2:
             filename = "medium_words.txt";
+            difficulty = "medium";
             break;
         case 3:
             filename = "hard_words.txt";
+            difficulty = "hard";
             break;
         case 4:
             filename = "ultrahard_words.txt";
+            difficulty = "ultra_hard"
             break;
         default:
             std::cout<<"Invalid choice\n";
@@ -149,6 +154,11 @@ int main(){
     return 0;
     
 }
+ 
+    
+
+     
+    
  
     
 
