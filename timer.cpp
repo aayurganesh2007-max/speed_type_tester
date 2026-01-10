@@ -1,30 +1,37 @@
-#include <iostream>
+#include "timer.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 
-bool start_timer(int duration_seconds) {
+void start_countdown(){
     /**
-     * @brief Starts a countdown timer for the specified duration.
-     * Also prints the remaining time dynamically till the timer ends
-     * 
-     * @param duration_seconds The total time for the countdown in seconds.
-     * @return true if the timer completes without interruption, false if interrupted.
+     * @brief Starts the countdown timer for the user before starting the typing session.
+     * @param none
+     * @return none
      */
+    std::cout<<"Typing session will start in: ";
+    for (int i=3; i>=0; i--){
+        std::cout << i <<std::flush;
 
-    using namespace std::chrono;
-    auto end_time = steady_clock::now() + seconds(duration_seconds);
-
-    while (true) {
-        auto now = steady_clock::now();
-        if (now >= end_time) break;
-
-        auto remaining = duration_cast<seconds>(end_time - now).count();
-        std::cout << "Time remaining: " << remaining << " seconds\r" << std::flush;
-
-        // Sleep until the next 1-second tick to reduce drift and CPU usage
-        std::this_thread::sleep_until(now + seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        //Use carriage return to move the cursor back to the beginning of the line
+        // and overwrite the previous number with spaces to clear it, then flush the output.
+        std::cout<< "\r";
     }
+    std::cout<<"\nStarting typing now\n";
+}
 
-    std::cout << "Time remaining: 0 seconds\n";
-    return true; // Timer completed
+
+void remaining_time(std::chrono::steady_clock::time_point end_time){
+    /**
+     * @brief Calculates the remaining time for the typing session, and displays it on the screen
+     * @param end_time The end time of the typing session.
+     * @return the remaining time in seconds
+     */
+    auto current_time = std::chrono::steady_clock::now();
+    std::chrono::seconds remaining = std::chrono::duration_cast<std::chrono::seconds>(end_time - current_time);
+    std::cout << "\rTime remaining: " << remaining.count() << " seconds" << std::flush; // Print on the same line
+    // Sleep for a short duration to prevent busy waiting and control tick rate
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
 }

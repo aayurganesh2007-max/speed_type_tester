@@ -1,8 +1,11 @@
 #include "file_handler.h"
+#include "analytics.h"
 #include <fstream>
 #include <cctype>
 #include <chrono>
 #include <ctime>
+#include <sstream>
+#include <algorithm>
 std::tuple<bool, std::vector<std::string>> read_words_from_file(const std::string &filename){
     /**
      * @brief Reads all the words from a file at once and stores them in a vector.
@@ -99,7 +102,8 @@ bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, co
         return false;
     }
     std::string time_str = session_data.start_data_time;
-    outfile<<time_str<<"|"; // extract the start date and time
+    std::string difficulty = session_data.difficulty_level;
+    outfile<<time_str<<","<<difficulty<<"|"; // extract the start date and time and difficulty
     for (const auto &word : incorrect_words) {
         outfile << word << " ";
     }
@@ -107,6 +111,58 @@ bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, co
     outfile.close();
     return true;
 }
+
+
+std::vector<LeaderboardEntry> read_leaderboard_from_file(const std::string &filename,std::string &difficulty){
+    /**
+     * *
+     * @brief Read all the entries form the csv file and filters it based on difficulty
+     * It then sorts the entries based on the net_wpm(descending) and accuracy if tied(descending) and returns a vector of LeaderboardEntry
+     * @param filename The name of the file to read from.
+     * @param difficulty The difficulty level of the session
+     * @return a vector of LeaderboardEntry
+     */
+    std::vector<LeaderboardEntry> entries;
+    std::ifstream infile(filename);
+    if (!infile.is_open()) {
+        return entries;
+    }
+    std::string line;
+    //skip the header
+    std::getline(infile, line);
+    while (std::getline(infile, line)) {
+        std::stringstream ss(line);
+        std::string cell;
+        std::vector<std::string> row;
+
+        while (std::getline(ss, cell, ',')) {
+            row.push_back(cell);
+        }
+
+        // Safety check
+        if (row.size() < 9) continue;
+
+        if (row[2] == difficulty) {
+            LeaderboardEntry e;
+            e.date_time = row[0];
+            e.difficulty = row[2];
+            e.net_wpm = std::stoi(row[4]);
+            e.accuracy_words = std::stoi(row[7]);
+            entries.push_back(e);
+        }
+    }
+    // Sort the entries based on net_wpm(descending) and accuracy if tied(descending)
+    std::sort(entries.begin(), entries.end(),
+        [](const LeaderboardEntry& a, const LeaderboardEntry& b) {
+            if (a.net_wpm != b.net_wpm)
+                return a.net_wpm > b.net_wpm;          // primary
+            return a.accuracy_words > b.accuracy_words; // tie-breaker
+        });
+
+    return entries;
+}
+
+
    
 
     

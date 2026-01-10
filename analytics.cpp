@@ -238,7 +238,7 @@ std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_da
     struct SessionData session_data;
     create_session_data(timer_seconds,display_words, inp_words, difficulty, session_data);
     std::vector<std::string> data;
-    data.push_back(session_data.date);
+    data.push_back(session_data.start_data_time);
     data.push_back(std::to_string(session_data.timestamp));
     data.push_back(session_data.difficulty_level);
     data.push_back(std::to_string(session_data.raw_wpm));
