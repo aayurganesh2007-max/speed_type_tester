@@ -14,7 +14,7 @@ bool input_typed_words(int num_words, std::vector<std::string>& inp_words, std::
 void display_random_words(const std::string& filename, int num_words, std::vector<std::string> & display_words);
 void display_session_summary(const std::vector<std::string> &data, const std::vector<std::string> &incorrect_words);
 bool write_analytics_csvfile(const std::string &filename, const std::vector<std::string> &data);
-bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename);
+bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename,struct SessionData &session_data);
 std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words);
 std::tuple<std::string, std::string> get_difficulty_level();
 int get_timer_choice();
@@ -25,6 +25,7 @@ int get_view_leaderboard_choice();
 bool main_session_running(int timer_seconds, std::vector<std::string> &display_words, std::vector<std::string> &inp_words,std::string &filename,int num_words);
 void display_leaderboard(std::string difficulty,int top_n);
 void start_countdown();
+
 int main(){
     std::vector<std::string> display_words;
     std::vector<std::string> inp_words;
@@ -55,7 +56,8 @@ int main(){
         std::cin.ignore(1000, '\n');
         save_choice = get_save_choice();
         if (save_choice == 1){
-            if(write_analytics_csvfile("speed_type_tester_analytics.csv",data) && write_incorrect_words_txtfile(incorrect_words,"speed_type_tester_incorrect_words.txt"))
+            SessionData session_data;
+            if(write_analytics_csvfile("speed_type_tester_analytics.csv",data) && write_incorrect_words_txtfile(incorrect_words,"speed_type_tester_incorrect_words.txt",session_data))
             {
                 std::cout<<"Data Saved Successfully\n";
             }
