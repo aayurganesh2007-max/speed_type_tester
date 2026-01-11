@@ -12,10 +12,10 @@
 // Forward declaration
 bool input_typed_words(int num_words, std::vector<std::string>& inp_words, std::chrono::steady_clock::time_point end_time);
 void display_random_words(const std::string& filename, int num_words, std::vector<std::string> & display_words);
-void display_session_summary(const std::vector<std::string> &data, const std::vector<std::string> &incorrect_words);
+void display_session_summary(struct SessionData &session_data);
 bool write_analytics_csvfile(const std::string &filename, const std::vector<std::string> &data);
 bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename,struct SessionData &session_data);
-std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words);
+std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words,std::string difficulty, struct SessionData &session_data);
 std::tuple<std::string, std::string> get_difficulty_level();
 int get_timer_choice();
 int get_num_words();
@@ -38,6 +38,8 @@ int main(){
     int start_choice;
     int save_choice;
     bool execute = false;
+    bool csv_write = false;
+    bool txt_write = false;
     int leaderboard_choice;
     std::cout<<"WELCOME TO SPEED TYPE TESTER\n";
     std::tie(difficulty, filename) = get_difficulty_level();
@@ -54,10 +56,14 @@ int main(){
     }   
     if(execute){
         std::cin.ignore(1000, '\n');
+        SessionData session_data;
+        std::tie(data,incorrect_words)=create_vector_data(timer_seconds,display_words,inp_words,difficulty,session_data);
+        display_session_summary(session_data);
         save_choice = get_save_choice();
         if (save_choice == 1){
-            SessionData session_data;
-            if(write_analytics_csvfile("speed_type_tester_analytics.csv",data) && write_incorrect_words_txtfile(incorrect_words,"speed_type_tester_incorrect_words.txt",session_data))
+            csv_write=write_analytics_csvfile("speed_type_tester_analytics.csv",data);
+            txt_write=write_incorrect_words_txtfile(incorrect_words,"speed_type_tester_incorrect_words.txt",session_data);
+            if (csv_write && txt_write)
             {
                 std::cout<<"Data Saved Successfully\n";
             }

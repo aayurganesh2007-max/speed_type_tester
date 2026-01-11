@@ -146,7 +146,7 @@ std::vector<LeaderboardEntry> read_leaderboard_from_file(const std::string &file
             LeaderboardEntry e;
             e.date_time = row[0];
             e.difficulty = row[2];
-            e.net_wpm = std::stoi(row[4]);
+            e.net_wpm = std::stoi(row[3]);
             e.accuracy_words = std::stoi(row[7]);
             entries.push_back(e);
         }

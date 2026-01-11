@@ -226,7 +226,7 @@ void create_session_data(int timer_seconds,const std::vector<std::string> &displ
     session_data.incorrect_words = incorrect_words_list(display_words, inp_words);
 }
 
-std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, std::string difficulty) {
+std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words,std::string difficulty, struct SessionData &session_data) {
     /**
      * @brief Creates a vector of strings containing the relevant data for analytics, from struct SessionData.
      * and returns the data and incorrect words list.
@@ -235,7 +235,6 @@ std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_da
      * @param inp_words A vector of strings containing the words typed by the user
      * @return tuple of two vectors- first one with data analytics, second one with incorrect words list.
      */
-    struct SessionData session_data;
     create_session_data(timer_seconds,display_words, inp_words, difficulty, session_data);
     std::vector<std::string> data;
     data.push_back(session_data.start_data_time);

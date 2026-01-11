@@ -60,18 +60,16 @@ bool input_typed_words(int num_words, std::vector<std::string> &inp_words,std::c
  * @return bool
  */
 {
-    std::string word;
     for (int i = 0; i < num_words; ++i) {
+        std::string word;
+        std::cin >> word;  // blocking
+
         if (std::chrono::steady_clock::now() >= end_time) {
-            return false;
+            return false;  // stop accepting further words
         }
 
-        if (!(std::cin >> word)) {
-            return false;
-        }
         inp_words.push_back(word);
     }
-
     return true;
 }
 
@@ -87,15 +85,17 @@ void display_session_summary(struct SessionData &session_data)
     std::cout << "Date and Time: " << session_data.start_data_time << std::endl;
     std::cout << "Time Taken (seconds): " << session_data.timestamp << std::endl;
     std::cout << "Difficulty Level: " << session_data.difficulty_level << std::endl;
-    std::cout << "net words per minute (WPM): " << session_data.net_wpm << std::endl;
     std::cout << "raw words per minute (WPM): " << session_data.raw_wpm << std::endl;
-    std::cout << "net characters per minute (CPM): " << session_data.net_cpm << std::endl;
+    std::cout << "net words per minute (WPM): " << session_data.net_wpm << std::endl;
     std::cout << "raw characters per minute (CPM): " << session_data.raw_cpm << std::endl;
+    std::cout << "net characters per minute (CPM): " << session_data.net_cpm << std::endl;
     std::cout << "Word Accuracy (%): " << session_data.accuracy_words << std::endl;
     std::cout << "Character Accuracy (%): " << session_data.accuracy_chars << std::endl;
+    std::cout << "Incorrect words : ";
     for (int i = 0; i < session_data.incorrect_words.size(); ++i) {
         std::cout << session_data.incorrect_words[i] << " ";
         }
+    std::cout<<"\n";
 }
 
 std::tuple<std::string, std::string> get_difficulty_level() {
@@ -191,7 +191,7 @@ int get_num_words() {
      * @return int
      */
     while (true) {
-        std::cout<<"Enter the number of words you want ot display per line: ";
+        std::cout<<"Enter the number of words you want to display per line: ";
         std::string num;
         std::cin>> num;
         try {
@@ -317,8 +317,8 @@ bool main_session_running(int timer_seconds, std::vector<std::string> &display_w
     auto start_time = std::chrono::steady_clock::now();
     auto end_time = start_time + std::chrono::seconds(timer_seconds);
     while (std::chrono::steady_clock::now() < end_time ){
+        remaining_time(end_time);
         std::cout<<"\n--- Round " << round_no << " ---" <<'\n';
-        auto remaining_time(end_time);
         display_random_words(filename,num_words,display_words);
         running = input_typed_words(num_words,inp_words,end_time);
         if (!running) break;
