@@ -6,6 +6,9 @@
 #include <ctime>
 #include <sstream>
 #include <algorithm>
+
+//csv schema
+//date_time,timestamp,difficulty_level,net_wpm,raw_wpm,net_cpm,raw_cpm,accuracy_words,accuracy_chars
 std::tuple<bool, std::vector<std::string>> read_words_from_file(const std::string &filename){
     /**
      * @brief Reads all the words from a file at once and stores them in a vector.
@@ -24,15 +27,20 @@ std::tuple<bool, std::vector<std::string>> read_words_from_file(const std::strin
     while (file >> word) {
         words.push_back(word);
     }
+    if (words.size() == 0) {
+        return std::make_tuple(false, words);
+    }
     file.close();
     return std::make_tuple(true, words);
 }
 
+//csv schema
+//date_time,timestamp,difficulty_level,net_wpm,raw_wpm,net_cpm,raw_cpm,accuracy_words,accuracy_chars
 bool write_analytics_csvfile(const std::string &filename, const std::vector<std::string> &data) {
     /**
      * @brief first reads the file, if the file doesnt not exist it creates a file 
      * Then checks if the header date_time,timestamp, difficulty_level,net_wpm, raw_wpm,net_cpm_raw_cpm,accuracy_words,accuracy_chars, already exists in the file
-     * then it writes onto the file
+     * if not then it writes onto the file
      * By updating the file every time it is called keeping the original data intact.
      * it writes the each row of data in a new line, under respective headers.
      * 
@@ -87,7 +95,9 @@ bool write_analytics_csvfile(const std::string &filename, const std::vector<std:
     return true;
 }
 
-bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, const std::string &filename, struct SessionData &session_data) {
+//txt schema
+//date_time,difficulty|incorrect_word1 incorrect_word2 incorrect_word3 ...
+bool write_incorrect_words_txtfile(const std::vector<std::string> &incorrect_words, const std::string &filename, const struct SessionData &session_data) {
     /**
      * @brief Writes the incorrect words to a text file with date and time 
      * In each row it consists of teh date time followed by all the incorrect words of a particular session
@@ -113,19 +123,19 @@ bool write_incorrect_words_txtfile(std::vector<std::string> &incorrect_words, co
 }
 
 
-std::vector<LeaderboardEntry> read_leaderboard_from_file(const std::string &filename,std::string &difficulty){
+std::tuple<bool, std::vector<LeaderboardEntry>> read_leaderboard_from_file(const std::string &filename,const std::string &difficulty){
     /**
      * *
      * @brief Read all the entries form the csv file and filters it based on difficulty
      * It then sorts the entries based on the net_wpm(descending) and accuracy if tied(descending) and returns a vector of LeaderboardEntry
      * @param filename The name of the file to read from.
      * @param difficulty The difficulty level of the session
-     * @return a vector of LeaderboardEntry
+     * @return a tuple containing a boolean indicating success or failure, and a vector of LeaderboardEntry
      */
     std::vector<LeaderboardEntry> entries;
     std::ifstream infile(filename);
     if (!infile.is_open()) {
-        return entries;
+        return std::make_tuple(false, entries);
     }
     std::string line;
     //skip the header
@@ -151,6 +161,10 @@ std::vector<LeaderboardEntry> read_leaderboard_from_file(const std::string &file
             entries.push_back(e);
         }
     }
+
+    if (entries.size() == 0) {
+        return std::make_tuple(false, entries);
+    }
     // Sort the entries based on net_wpm(descending) and accuracy if tied(descending)
     std::sort(entries.begin(), entries.end(),
         [](const LeaderboardEntry& a, const LeaderboardEntry& b) {
@@ -158,11 +172,5 @@ std::vector<LeaderboardEntry> read_leaderboard_from_file(const std::string &file
                 return a.net_wpm > b.net_wpm;          // primary
             return a.accuracy_words > b.accuracy_words; // tie-breaker
         });
-
-    return entries;
+    return std::make_tuple(true, entries);
 }
-
-
-   
-
-    

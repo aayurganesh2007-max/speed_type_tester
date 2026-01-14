@@ -27,7 +27,7 @@ std::vector<std::string> generate_random_words(int num_words, std::vector<std::s
 }
 void display_random_words(const std::string &filename, int num_words, std::vector<std::string> &display_words)
 /**
- * @brief Displays a specified number of random words in same line from a given file randomnly.
+ * @brief Displays a specified number of random words in same line from a given file randomnly as well as stores them in a vector
  *
  * @param filename The name of the file containing the words.
  * @param num_words The number of random words to display.
@@ -49,7 +49,7 @@ void display_random_words(const std::string &filename, int num_words, std::vecto
     std::cout<<'\n';
 }
 
-bool input_typed_words(int num_words, std::vector<std::string> &inp_words,std::chrono::steady_clock::time_point end_time)
+bool input_typed_words(int num_words, std::vector<std::string> &inp_words,const std::chrono::steady_clock::time_point end_time)
 /**
  * @brief Takes a specified number of words as input , and takes so many words in one line and then stores each word one by one into the vector.
  * at any point if the time is up or the user enters an empty word, the function returns false
@@ -57,7 +57,7 @@ bool input_typed_words(int num_words, std::vector<std::string> &inp_words,std::c
  * @param num_words The number of words to input.
  * @param inp_words A reference to a vector where the input words will be stored.
  * @param end_time The end time of the typing session.
- * @return bool
+ * @return bool true if the session is running, false otherwise
  */
 {
     for (int i = 0; i < num_words; ++i) {
@@ -73,7 +73,7 @@ bool input_typed_words(int num_words, std::vector<std::string> &inp_words,std::c
     return true;
 }
 
-void display_session_summary(struct SessionData &session_data)
+void display_session_summary(const struct SessionData &session_data)
 /**
  * @brief Displays a summary of the typing session based on the provided data.
  *
@@ -305,7 +305,37 @@ int get_view_leaderboard_choice(){
     }
 }
 
-bool main_session_running(int timer_seconds, std::vector<std::string> &display_words, std::vector<std::string> &inp_words,std::string &filename,int num_words){
+SessionConfig setup_session_config() {
+    /**
+     * @brief creating a struct to store the session config and fetching the values from the user by calling the functions
+     * @param none
+     * @return a struct containing the session config
+     */
+    SessionConfig cfg;
+    std::tie(cfg.difficulty, cfg.filename) = get_difficulty_level();
+    cfg.timer_seconds = get_timer_choice();
+    cfg.num_words = get_num_words();
+    return cfg;
+}
+
+bool run_typing_phase(int timer_seconds,int num_words,const std::string& filename,std::vector<std::string>& display_words,std::vector<std::string>& inp_words
+) {
+    /**
+     * @brief it starts the typing session and returns true if the session is running successfully
+     * @param timer_seconds The time limit for the typing session.
+     * @param num_words The number of words to be typed per line.
+     * @param filename The name of the file containing the words to be typed.
+     * @param display_words A vector of strings containing the words to be typed.
+     * @param inp_words A vector of strings containing the words typed by the user.
+     * @return true if the session is running successfully, false otherwise.     
+     */
+    int start_choice = get_start_choice();
+    if (start_choice != 1) return false;
+
+    start_countdown();
+    return main_session_running(timer_seconds, display_words, inp_words, filename, num_words);
+}
+bool main_session_running(int timer_seconds, std::vector<std::string> &display_words, std::vector<std::string> &inp_words,const std::string &filename,int num_words){
     /**
      * @brief Integrates all the functions, basically calls the display_random_words function and the input_typed_words function as long as the timer is not up
      * also diplays the remaining time while typing
@@ -327,15 +357,60 @@ bool main_session_running(int timer_seconds, std::vector<std::string> &display_w
     return true;
 }
 
-void display_leaderboard(std::string difficulty,int top_n){
+SessionData process_anaytics(int timer_seconds,const std::string &difficulty,const std::vector<std::string> &display_words,const std::vector<std::string> &inp_words,std::vector<std::string> &data,std::vector<std::string> &incorrect_words){
+    /**
+     * @brief It processes the analytics of the typing session and returns a struct containing the relevant data.
+     * @param timer_seconds The time limit for the typing session.
+     * @param difficulty The difficulty level of the typing session.
+     * @param display_words A vector of strings containing the words to be typed.
+     * @param inp_words A vector of strings containing the words typed by the user.
+     * @param data A vector of strings containing the data to be written to the analytics file.
+     * @param incorrect_words A vector of strings containing the incorrect words typed by the user.
+     * @return a struct containing the relevant data.
+     */
+    std::cin.ignore(1000, '\n');// clear the buffer
+    SessionData session_data;
+    std::tie(data,incorrect_words)=create_vector_data(timer_seconds,display_words,inp_words,difficulty,session_data);
+    display_session_summary(session_data);
+    return session_data;
+}
+
+bool save_session_data(const std::vector<std::string> &data,const std::vector<std::string> &incorrect_words,const SessionData &session_data){
+    /**
+     * @brief It saves the data to the analytics file and the incorrect words file after taking the choice from the user.
+     * @param data A vector of strings containing the data to be written to the analytics file.
+     * @param incorrect_words A vector of strings containing the incorrect words typed by the user.
+     * @param session_data A struct containing the relevant data for the session.
+     * @return bool true if the data is saved successfully, false otherwise.
+     */
+    int save_choice = get_save_choice();
+    if (save_choice != 1) return false;
+    bool csv_write = write_analytics_csvfile("speed_type_tester_analytics.csv",data);
+    bool txt_write = write_incorrect_words_txtfile(incorrect_words,"speed_type_tester_incorrect_words.txt",session_data);
+    if (csv_write && txt_write)
+    {
+        std::cout<<"Data Saved Successfully\n";
+        return true;
+    }
+    else{
+        std::cout<<"Couldn't Save Data\n";
+        return false;
+    }
+}
+
+
+
+void display_leaderboard(const std::string &difficulty,int top_n){
     /**
      * @brief Displays the leaderboard based on the difficulty level
      * @param difficulty The difficulty level of the session
      * @return none
      */
-    std::vector<LeaderboardEntry> entries = read_leaderboard_from_file("speed_type_tester_analytics.csv",difficulty);
-    if (entries.empty()) {
-        std::cout << "No entries found.\n";
+    bool success;
+    std::vector<LeaderboardEntry> entries;
+    std::tie(success, entries) = read_leaderboard_from_file("speed_type_tester_analytics.csv",difficulty);
+    if (!success) {
+        std::cout << "Error: no entries found.\n";
         return;
     }
     std::cout << "\nLeaderboard\n";
@@ -343,5 +418,17 @@ void display_leaderboard(std::string difficulty,int top_n){
     for (int i = 0; i < top_n && i < entries.size(); ++i) {
         std::cout << entries[i].date_time << "," << entries[i].difficulty << "," << entries[i].net_wpm << "," << entries[i].accuracy_words << "\n";
     }
-}   
+}  
+
+void show_leaderboard(const std::string &difficulty){
+    /**
+     * @brief It displays the leaderboard based on the difficulty level after taking the choice from the user.
+     * @param difficulty The difficulty level of the typing session.
+     * @return none
+     */
+    int leaderboard_choice = get_view_leaderboard_choice();
+    if (leaderboard_choice != 1) return;
+    int top_n = 3;
+    display_leaderboard(difficulty,top_n);
+}
 

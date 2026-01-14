@@ -1,4 +1,5 @@
 #include "analytics.h"
+#include "timer.h"
 #include <algorithm>
 #include <cctype>
 #include <ctime>
@@ -13,7 +14,7 @@ int net_words_per_minute(int timer_seconds,const std::vector<std::string> &displ
  * @param seconds The total time taken to type the words.
  * @param display_words A vector of strings containing the words to be typed.
  * @param inp_words A vector of strings containing the words typed by the user.
- * @return The number of words typed per minute.
+ * @return The number of words correctly typed per minute.
  * If seconds is zero, returns zero to avoid division by zero.
  * Otherwise, returns the number of correct words typed per minute.
  */
@@ -88,7 +89,7 @@ int raw_chars_per_minute(int timer_seconds, const std::vector<std::string> &disp
 }
 std::tuple<std::vector<std::string>, std::vector<std::string>> correct_words_check(const std::vector<std::string> &display_words,const std::vector<std::string> &inp_words){
     /**
-    * @brief Checks the number of correct and incorrect words typed by the user (case sensitive)
+    * @brief Checks the number of correct and incorrect words typed by the user (case sensitive) and returns them as vectors
     * 
     * @param display_words A vector of strings containing the words to be typed
     * @param inp_words A vector of strings containing the words typed by the user
@@ -112,7 +113,7 @@ std::tuple<std::vector<std::string>, std::vector<std::string>> correct_words_che
 }
 std::tuple<int, int> correct_chars_check(const std::vector<std::string> &display_words,const std::vector<std::string> &inp_words){
     /**
-    * @brief Checks the number of correct characters typed by the user
+    * @brief Checks the number of correct characters typed by the user and returns them as a tuple
     * 
     * @param display_words A vector of strings containing the words to be typed
     * @param inp_words A vector of strings containing the words typed by the user
@@ -131,8 +132,7 @@ std::tuple<int, int> correct_chars_check(const std::vector<std::string> &display
        }
        else{
            total_chars += inp_words[i].length();
-       }
-       
+       }  
        //check character by character
        int word_length = std::min(display_words[i].length(), inp_words[i].length());
        for(int j=0; j<word_length; j++){
@@ -197,7 +197,7 @@ int accuracy_chars(const std::vector<std::string> &display_words, const std::vec
 }
 
 
-void create_session_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, std::string difficulty, struct SessionData &session_data) {
+void create_session_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, const std::string &difficulty, struct SessionData &session_data) {
     /**
      * @brief Creates a struct containing the relevant data for analytics.(Only called by create_vector_data)
      *    
@@ -208,13 +208,7 @@ void create_session_data(int timer_seconds,const std::vector<std::string> &displ
      * returns:
      * None
      */
-    auto now = std::chrono::system_clock::now();
-    auto current_time = std::chrono::system_clock::to_time_t(now);
-    std::tm* time = std::localtime(&current_time);
-    std::ostringstream oss;
-    oss << std::put_time(time, "%Y-%m-%d %H:%M:%S");
-    std::string time_str = oss.str();
-    session_data.start_data_time = time_str; // extract the start date and time
+    session_data.start_data_time = get_date_time(); // extract the start date and time
     session_data.timestamp = timer_seconds;// timestamp
     session_data.difficulty_level = difficulty;
     session_data.raw_wpm = raw_words_per_minute(timer_seconds,display_words, inp_words);
@@ -226,7 +220,7 @@ void create_session_data(int timer_seconds,const std::vector<std::string> &displ
     session_data.incorrect_words = incorrect_words_list(display_words, inp_words);
 }
 
-std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words,std::string difficulty, struct SessionData &session_data) {
+std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, const std::string &difficulty, struct SessionData &session_data) {
     /**
      * @brief Creates a vector of strings containing the relevant data for analytics, from struct SessionData.
      * and returns the data and incorrect words list.
@@ -248,4 +242,3 @@ std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_da
     data.push_back(std::to_string(session_data.accuracy_chars));
     return std::make_tuple(data, session_data.incorrect_words);
 }
-

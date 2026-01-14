@@ -26,6 +26,6 @@ struct SessionData {
     int accuracy_chars;
     std::vector<std::string> incorrect_words;
 };
-void create_session_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, std::string difficulty, struct SessionData &session_data);
-std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, std::string difficulty,struct SessionData &session_data);
+void create_session_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, const std::string &difficulty, struct SessionData &session_data);
+std::tuple <std::vector<std::string>, std::vector<std::string>> create_vector_data(int timer_seconds,const std::vector<std::string> &display_words, const std::vector<std::string> &inp_words, const std::string &difficulty, struct SessionData &session_data);
 #endif // ANALYTICS_H
