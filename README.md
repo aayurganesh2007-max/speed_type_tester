@@ -163,10 +163,6 @@ g++ -std=c++17 -Wall -Wextra *.cpp -o typing_test
 
 Developed as a learning project to strengthen **C++ programming**, **software design**, and **problem-solving skills**.
 
----
-## 🤖 AI Assistance Disclosure
 
-AI tools were used only for **code review and design feedback**, not for writing code.  
-All implementation, debugging, and integration were done manually by the author.
 
 
