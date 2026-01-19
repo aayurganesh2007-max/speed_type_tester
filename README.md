@@ -7,11 +7,15 @@ This project focuses on clean modular design, file handling, and time-based inpu
 
 <img width="450" height="300" alt="image" src="https://github.com/user-attachments/assets/23338db4-b52e-4800-b8a6-a1ba31807123" />
 
-<img width="450" height="300" alt="image" src="https://github.com/user-attachments/assets/35e0df91-8b05-4ea4-a781-8acd78ebca37" />
 
-<img width="450" height="300" alt="image" src="https://github.com/user-attachments/assets/a49a967e-d7bf-4d0b-9443-e52e589e3857" />
+<img width="450" height="500" alt="image" src="https://github.com/user-attachments/assets/35e0df91-8b05-4ea4-a781-8acd78ebca37" />
+
+
+<img width="450" height="600" alt="image" src="https://github.com/user-attachments/assets/a49a967e-d7bf-4d0b-9443-e52e589e3857" />
+
 
 <img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/c99436e4-8e42-4ab9-980b-08d10946aa4a" />
+
 
 <img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/74019607-7835-45df-9875-c6cc82ebd367" />
 
